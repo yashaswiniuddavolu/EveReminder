@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">0
+    <title>College Event Management System</title>
+    <link rel="stylesheet" href="styless1.css">
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body>
+    <!-- College Verification Popup (Always shown first) -->
+    <div id="college-verification" style="display: flex;">
+        <div class="college-verification-box">
+            <h2>College Verification</h2>
+            <form id="collegeForm">
+                <div class="form-group">
+                    <label for="collegeName">Enter College Name:</label>
+                    <input type="text" id="collegeName" required>
+                </div>
+                <button type="submit">Verify College</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Signup Section (Hidden Initially) -->
+    <div id="signup-section" style="display: none;">
+        <div class="signup-box">
+            <h2>Create Account</h2>
+            <form id="signupForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="firstName">First Name:</label>
+                        <input type="text" id="firstName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="middleName">Middle Name:</label>
+                        <input type="text" id="middleName">
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">Last Name:</label>
+                        <input type="text" id="lastName" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="gender">Gender:</label>
+                    <select id="gender" required>
+                        <option value="">Select Gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="department">Department:</label>
+                    <select id="department" required>
+                        <option value="">Select Department</option>
+                        <option value="CSE">Computer Science Engineering</option>
+                        <option value="MBBS">Medical Science</option>
+                        <option value="DENTAL">Dental Science</option>
+                        <option value="MECHANICAL">Mechanical Engineering</option>
+                        <option value="ELECTRICAL">Electrical Engineering</option>
+                        <option value="CIVIL">Civil Engineering</option>
+                        <option value="BUSINESS">Business Administration</option>
+                        <option value="LAW">Law</option>
+                        <option value="PHARMACY">Pharmacy</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="userType">You are:</label>
+                    <select id="userType" required>
+                        <option value="">Select User Type</option>
+                        <option value="student">Student</option>
+                        <option value="admin">Admin</option>
+                        <option value="organizer">Organizer</option>
+                    </select>
+                </div>
+                
+                <button type="submit">Sign Up</button>
+                <p class="login-link">Already have an account? <a href="#" onclick="showLogin()">Login</a></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Login Section (Hidden Initially) -->
+    <div id="login-section" style="display: none;">
+        <div class="login-box">
+            <h2>Login</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">Email:</label>
+                    <input type="email" id="loginEmail" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="loginPassword">Password:</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                
+                <button type="submit">Login</button>
+                <p class="signup-link">Don't have an account? <a href="#" onclick="showSignup()">Sign Up</a></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Content (Hidden Initially) -->
+    <div id="main-content" style="display: none;">
+        <header>
+            <div class="header-content">
+                <h1>College Event Management System</h1>
+                <div class="user-profile">
+                    <img id="user-avatar" src="" alt="User Avatar" class="user-avatar">
+                    <div class="user-greeting">
+                        <span>Hi, <span id="user-greeting-name"></span>!</span>
+                        <span id="user-role"></span>
+                    </div>
+                </div>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#" onclick="showSection('dashboard')">Dashboard</a></li>
+                    <li id="student-registration-link" style="display: none;"><a href="#" onclick="showSection('student-event-registration')">Event Registration</a></li>
+                    <li id="registered-events-link" style="display: none;"><a href="#" onclick="showSection('student-registered-events')">My Events</a></li>
+                    <li id="admin-events-link" style="display: none;"><a href="#" onclick="showSection('admin-event-creation')">Create Event</a></li>
+                    <li id="admin-budget-link" style="display: none;"><a href="#" onclick="showSection('admin-event-budget')">Event Budget</a></li>
+                    <li id="admin-registrations-link" style="display: none;"><a href="#" onclick="showSection('admin-registrations')">Registrations</a></li>
+                    <li id="organizer-events-link" style="display: none;"><a href="#" onclick="showSection('organizer-event-management')">Manage Events</a></li>
+                    <li id="feedback-link"><a href="#" onclick="showSection('feedback-section')">Feedback</a></li>
+                    <li><a href="#" onclick="logout()">Logout</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <main>
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="section active">
+                <div class="user-profile-card">
+                    <div class="profile-avatar-container">
+                        <img id="profile-avatar" src="" alt="Profile Avatar" class="profile-avatar">
+                    </div>
+                    <div class="profile-info">
+                        <h2>Welcome, <span id="welcome-user"></span></h2>
+                        <p><strong>Role:</strong> <span id="profile-role"></span></p>
+                        <p><strong>Department:</strong> <span id="profile-dept"></span></p>
+                        <p><strong>Email:</strong> <span id="profile-email"></span></p>
+                    </div>
+                </div>
+                
+                <div class="dashboard-tabs">
+                    <button onclick="showEvents('upcoming-events')" class="active">Upcoming Events</button>
+                    <button onclick="showEvents('past-events')">Past Events</button>
+                </div>
+                <div id="upcoming-events" class="active">
+                    <h3>Upcoming Events</h3>
+                    <div class="events-grid">
+                        <!-- Upcoming Events will be loaded dynamically -->
+                    </div>
+                </div>
+                <div id="past-events">
+                    <h3>Past Events</h3>
+                    <div class="events-grid">
+                        <!-- Past Events will be loaded dynamically -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Student Event Registration Section -->
+           <!-- Student Event Registration Section -->
+<section id="student-event-registration" class="section">
+    <h2>Event Registration</h2>
+    <form id="eventRegistrationForm" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="studentPhoto">Your Photo:</label>
+            <input type="file" id="studentPhoto" accept="image/*" required>
+            <div id="photoPreview" class="photo-preview"></div>
+        </div>
+        
+        <div class="form-group">
+            <label for="studentName">Full Name:</label>
+            <input type="text" id="studentName" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="studentId">Student ID:</label>
+            <input type="text" id="studentId" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="eventSelect">Event to Join:</label>
+            <select id="eventSelect" required>
+                <option value="">Select Event</option>
+                <!-- Events will be loaded dynamically -->
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="eventDate">Event Date:</label>
+            <input type="date" id="eventDate" readonly>
+        </div>
+
+        <div class="form-group">
+            <label for="eventPrice">Event Price:</label>
+            <input type="text" id="eventPrice" readonly>
+        </div>
+
+        <!-- Payment Section -->
+        <div class="payment-section">
+            <div class="form-group">
+                <label>Payment Method:</label>
+                <div class="payment-method-selector">
+                    <button type="button" class="payment-method-btn active" data-method="razorpay">Pay with Razorpay</button>
+                    <button type="button" class="payment-method-btn" data-method="qr">QR Code Payment</button>
+                </div>
+            </div>
+
+            <div id="qrPaymentSection" style="display: none;">
+                <div class="form-group">
+                    <label>Scan QR Code to Pay:</label>
+                    <div id="qrCodeContainer"></div>
+                    <div id="paymentPinSection" style="display: none;">
+                        <label for="paymentPin">Enter 4-digit PIN:</label>
+                        <input type="text" id="paymentPin" maxlength="4" placeholder="1234">
+                        <button type="button" id="verifyPinBtn">Verify PIN</button>
+                    </div>
+                    <p class="payment-instruction">Scan the QR code with your payment app to complete the transaction.</p>
+                    <p class="payment-pin-info">Your verification PIN: <span id="displayPin"></span></p>
+                </div>
+            </div>
+
+            <div id="razorpayPaymentSection">
+                <div class="form-group">
+                    <p>You will be redirected to Razorpay payment gateway after clicking "Register for Event"</p>
+                </div>
+            </div>
+        </div>
+        
+        <button type="submit" id="registerBtn">Register for Event</button>
+        <div id="paymentStatus" class="payment-status" style="display: none;"></div>
+    </form>
+</section>
+            <!-- Student Registered Events Section -->
+            <section id="student-registered-events" class="section">
+                <h2>My Registered Events</h2>
+                <div class="registered-events-container">
+                    <p id="no-registrations" class="info-message">You haven't registered for any events yet.</p>
+                    <div id="registered-events-list"></div>
+                </div>
+            </section>
+
+            <!-- Admin Event Creation Section -->
+            <section id="admin-event-creation" class="section">
+                <h2>Create New Event</h2>
+                <form id="adminCreateEventForm">
+                    <div class="form-group">
+                        <label for="eventName">Event Name:</label>
+                        <input type="text" id="eventName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="eventImage">Event Image:</label>
+                        <input type="file" id="eventImage" accept="image/*" required>
+                        <div id="eventImagePreview" class="photo-preview"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="eventDateAdmin">Date:</label>
+                        <input type="date" id="eventDateAdmin" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="eventLocation">Location:</label>
+                        <input type="text" id="eventLocation" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="eventDescription">Description:</label>
+                        <textarea id="eventDescription" rows="4" required></textarea>
+                    </div>
+                    <button type="submit" id="createEventBtn">Create Event</button>
+                </form>
+            </section>
+
+            <!-- Admin Event Budget Section -->
+            <section id="admin-event-budget" class="section">
+                <h2>Event Budget</h2>
+                <form id="adminBudgetForm">
+                    <div class="form-group">
+                        <label for="budgetEventSelect">Select Event:</label>
+                        <select id="budgetEventSelect" required>
+                            <option value="">Select Event</option>
+                            <!-- Events will be loaded dynamically -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="budgetAmount">Budget Amount:</label>
+                        <input type="number" id="budgetAmount" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="budgetEventPrice">Set Event Price:</label>
+                        <input type="number" id="budgetEventPrice" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="budgetDetails">Budget Details:</label>
+                        <textarea id="budgetDetails" rows="4" required></textarea>
+                    </div>
+                    <button type="submit">Submit Budget</button>
+                </form>
+            </section>
+
+            <!-- Organizer Event Management Section -->
+            <section id="organizer-event-management" class="section">
+                <h2>Manage Events</h2>
+                <div class="events-grid">
+                    <!-- Events will be loaded here with management options -->
+                </div>
+            </section>
+
+            <!-- Admin Registrations Section -->
+            <section id="admin-registrations" class="section">
+                <h2>Student Registrations</h2>
+                <div class="registration-filter">
+                    <label for="adminFilterEvent">Filter by Event:</label>
+                    <select id="adminFilterEvent">
+                        <option value="all">All Events</option>
+                        <!-- Events will be loaded dynamically -->
+                    </select>
+                </div>
+                <div id="admin-registrations-list" class="registrations-list">
+                    <!-- Student registrations will be displayed here -->
+                    <p class="info-message">No registrations available.</p>
+                </div>
+            </section>
+
+            <!-- Feedback Section -->
+            <section id="feedback-section" class="section">
+                <h2>Feedback</h2>
+                <form id="feedbackForm">
+                    <div class="form-group">
+                        <label for="feedbackType">Feedback Type:</label>
+                        <select id="feedbackType">
+                            <option value="general">General Feedback</option>
+                            <option value="event">Event Feedback</option>
+                            <option value="system">System Feedback</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="feedbackEventSelect" id="feedbackEventLabel" style="display: none;">Select Event:</label>
+                        <select id="feedbackEventSelect" style="display: none;">
+                            <!-- Events will be loaded dynamically -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="feedbackText">Your Feedback:</label>
+                        <textarea id="feedbackText" rows="5" required></textarea>
+                    </div>
+                    <button type="submit">Submit Feedback</button>
+                </form>
+                
+                <!-- Admin Feedback View Section -->
+                <div id="admin-feedback-view" style="display: none;">
+                    <h3>Feedback Received</h3>
+                    <div class="feedback-filter">
+                        <label for="feedbackFilterType">Filter by Type:</label>
+                        <select id="feedbackFilterType">
+                            <option value="all">All Types</option>
+                            <option value="general">General</option>
+                            <option value="event">Event</option>
+                            <option value="system">System</option>
+                        </select>
+                    </div>
+                    <div id="feedback-list" class="feedback-list">
+                        <!-- Feedback items will be displayed here -->
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>About Us</h3>
+                    <p>Streamlining college events with efficiency and innovation.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Contact Us</h3>
+                    <ul>
+                        <li>Email: info@collegeevents.com</li>
+                        <li>Phone: +1 555-123-4567</li>
+                        <li>Address: 123 College St, City, State</li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Follow Us</h3>
+                    <div class="social-links">
+                        <a href="#" target="_blank"><img src="images/facebook logo.avif" alt="Facebook"></a>
+                        <a href="#" target="_blank"><img src="images/imstagram logo.jpeg" alt="Instagram"></a>
+                        <a href="#" target="_blank"><img src="images/twitter logo.png" alt="Twitter"></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2025 College Event Management System. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="scriptss1.js"></script>
+</body>
+</html>
